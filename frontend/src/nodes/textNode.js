@@ -1,6 +1,6 @@
 // textNode.js — Part 3: auto-resize textarea + dynamic variable handles
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Handle, Position } from 'reactflow';
+import { Handle, Position, useReactFlow } from 'reactflow';
 
 // Matches valid JS identifiers wrapped in {{ }}
 const VARIABLE_REGEX = /\{\{\s*([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\}\}/g;
@@ -41,6 +41,12 @@ export const TextNode = ({ id, data }) => {
   }, [text]);
 
   const handleChange = useCallback((e) => setText(e.target.value), []);
+
+  const { deleteElements } = useReactFlow();
+  const handleDelete = useCallback(
+    (e) => { e.stopPropagation(); deleteElements({ nodes: [{ id }] }); },
+    [id, deleteElements]
+  );
 
   return (
     <div
@@ -87,9 +93,8 @@ export const TextNode = ({ id, data }) => {
       >
         <span className="node-icon">📝</span>
         <span className="node-title">Text</span>
-        <span className="node-tag" style={{ color: '#ec4899' }}>
-          TEXT
-        </span>
+        <span className="node-tag" style={{ color: '#ec4899' }}>TEXT</span>
+        <button className="node-delete-btn" onClick={handleDelete} title="Delete node">✕</button>
       </div>
 
       {/* Body */}

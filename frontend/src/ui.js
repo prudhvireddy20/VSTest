@@ -1,6 +1,6 @@
 // ui.js — Pipeline canvas
 import { useState, useRef, useCallback } from 'react';
-import ReactFlow, { Controls, Background, MiniMap, BackgroundVariant } from 'reactflow';
+import ReactFlow, { Controls, Background, MiniMap, BackgroundVariant, MarkerType, ReactFlowProvider } from 'reactflow';
 import { useStore } from './store';
 import { shallow } from 'zustand/shallow';
 import { InputNode }       from './nodes/inputNode';
@@ -40,7 +40,13 @@ const selector = (s) => ({
   onConnect:     s.onConnect,
 });
 
-export const PipelineUI = () => {
+export const PipelineUI = () => (
+  <ReactFlowProvider>
+    <PipelineCanvas />
+  </ReactFlowProvider>
+);
+
+const PipelineCanvas = () => {
   const wrapperRef = useRef(null);
   const [rfInstance, setRfInstance] = useState(null);
   const { nodes, edges, getNodeID, addNode, onNodesChange, onEdgesChange, onConnect } =
@@ -72,6 +78,15 @@ export const PipelineUI = () => {
     e.dataTransfer.dropEffect = 'move';
   }, []);
 
+  // Delete an edge when clicked
+  const onEdgeClick = useCallback(
+    (e, edge) => {
+      e.stopPropagation();
+      onEdgesChange([{ type: 'remove', id: edge.id }]);
+    },
+    [onEdgesChange]
+  );
+
   return (
     <div ref={wrapperRef} className="canvas-wrapper">
       <ReactFlow
@@ -90,6 +105,10 @@ export const PipelineUI = () => {
         connectionLineType="smoothstep"
         defaultViewport={{ x: 80, y: 80, zoom: 1 }}
         fitViewOptions={{ padding: 0.2 }}
+        deleteKeyCode={['Delete', 'Backspace']}
+        onEdgeClick={onEdgeClick}
+        edgesFocusable
+        edgesUpdatable
       >
         <Background
           variant={BackgroundVariant.Dots}

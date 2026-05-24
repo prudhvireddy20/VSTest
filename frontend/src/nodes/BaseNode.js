@@ -2,7 +2,7 @@
 // All node types extend this component via configuration props.
 
 import { useState, useCallback } from 'react';
-import { Handle, Position } from 'reactflow';
+import { Handle, Position, useReactFlow } from 'reactflow';
 
 /**
  * BaseNode — the single source of truth for all pipeline nodes.
@@ -43,6 +43,16 @@ export const BaseNode = ({
     });
     return init;
   });
+
+  // Delete this node (and its connected edges) from the canvas
+  const { deleteElements } = useReactFlow();
+  const handleDelete = useCallback(
+    (e) => {
+      e.stopPropagation();
+      deleteElements({ nodes: [{ id }] });
+    },
+    [id, deleteElements]
+  );
 
   const handleChange = useCallback(
     (name, value) => {
@@ -85,6 +95,9 @@ export const BaseNode = ({
             {tag}
           </span>
         )}
+        <button className="node-delete-btn" onClick={handleDelete} title="Delete node">
+          ✕
+        </button>
       </div>
 
       {/* ── Input connector labels ────────────────────────────── */}
